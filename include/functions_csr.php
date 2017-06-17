@@ -67,12 +67,16 @@ else {
 }
 
 // Write SAN to file if SAN are requested
-if (isset($_POST['cert_dn']['subjectAltName'])) { // check if SAN is not empty
-    $t_config = file_get_contents($config['config']);
-    //write the entire string
-    $temp_path = tempnam(sys_get_temp_dir(), "phpca-${cert_dn}");
-    copy($config['config'], $temp_path);
-    $t_config .= <<<EOS
+if (isset($cert_dn['subjectAltName'])) {
+    $sa_names = array_merge($cert_dn['subjectAltName'], [$cert_dn['commonName'], ]);
+} else {
+    $sa_names = $cert_dn['commonName'];
+}
+$t_config = file_get_contents($config['config']);
+//write the entire string
+$temp_path = tempnam(sys_get_temp_dir(), "phpca-${cert_dn}");
+copy($config['config'], $temp_path);
+$t_config .= <<<EOS
 
 [ v3_req ]
 basicConstraints = CA:FALSE
@@ -80,15 +84,15 @@ keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 subjectAltName = @alt_names
 
 [alt_names]
+
 EOS;
-    $sa_names = explode(',', $_POST['cert_dn']['subjectAltName']);
-    foreach ($sa_names as $idx => $value) {
-        $my_idx = $idx + 1;
-        $t_config .= "DNS.${my_idx} = ${value}".PHP_EOL;
-    }
-    file_put_contents($temp_path, $t_config);
-    $config['config'] = $temp_path;
+$sa_names = explode(',', $_POST['cert_dn']['subjectAltName']);
+foreach ($sa_names as $idx => $value) {
+    $my_idx = $idx + 1;
+    $t_config .= "DNS.${my_idx} = ${value}".PHP_EOL;
 }
+file_put_contents($temp_path, $t_config);
+$config['config'] = $temp_path;
 
 print "<h1>Creating Client CSR and Client Key</h1>";
 
