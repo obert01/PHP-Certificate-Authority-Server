@@ -67,17 +67,24 @@ else {
 }
 
 // Write SAN to file if SAN are requested
-if (isset($_POST['subjectAltName']) { // check if SAN is not empty
+if (isset($_POST['cert_dn']['subjectAltName'])) { // check if SAN is not empty
     $t_config = file_get_contents($config['config']);
     //write the entire string
     $temp_path = tempnam(sys_get_temp_dir(), "phpca-${cert_dn}");
     copy($config['config'], $temp_path);
-    $t_config = str_replace('keyUsage = nonRepudiation, digitalSignature, keyEncipherment',
-                            'keyUsage = nonRepudiation, digitalSignature, keyEncipherment\nsubjectAltName = @alt_names', $t_config);
-    $t_config .= "[alt_names]\n";
-    $sa_names = $_POST['subjectAltName'].split(',');
-    foreach ($sa_na as $idx => $value) {
-        $t_config .= "DNS.${idx} = ${value}";
+    $t_config .= <<<EOS
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+EOS;
+    $sa_names = explode(',', $_POST['cert_dn']['subjectAltName']);
+    foreach ($sa_names as $idx => $value) {
+        $my_idx = $idx + 1;
+        $t_config .= "DNS.${my_idx} = ${value}".PHP_EOL;
     }
     file_put_contents($temp_path, $t_config);
     $config['config'] = $temp_path;
@@ -114,6 +121,7 @@ if (0 === strpos($config['config'], sys_get_temp_dir())) {
     unlink($config['config']);
 }
 
+str_replace(search, replace, subject)
 print "<b>Exporting CSR to file...</b><br/>";
 openssl_csr_export_to_file($my_csr, $client_reqFile) or die ('Fatal: Error exporting CSR to file');
 print "Done<br/><br/>\n";
