@@ -13,6 +13,7 @@ $my_x509_parse = openssl_x509_parse(file_get_contents($config['cacert']));
 <input type="hidden" name="menuoption" value="createCSR"/>
 <table  style="width: 90%;">
 <tr><th width=100>Common Name (eg www.golf.local)</th><td><input type="text" name="cert_dn[commonName]" value="ABC Widgets Certificate Authority" size="40"></td></tr>
+<tr><th width=100>SAN (Subject Alternate Name)</th><td><input type="text" name="cert_dn[subjectAltName]" value="" size="40"></td></tr>
 <tr><th>Contact Email Address</th><td><input type="text" name="cert_dn[emailAddress]" value=<?PHP if (array_key_exists('emailAddress',$my_x509_parse['subject'])) print $my_x509_parse['subject']['emailAddress']; else print '""';?> size="30"></td></tr>
 <tr><th>Organizational Unit Name</th><td><input type="text" name="cert_dn[organizationalUnitName]" value=<?PHP if (array_key_exists('OU',$my_x509_parse['subject'])) print $my_x509_parse['subject']['OU']; else print '""';?> size="30"></td></tr>
 <tr><th>Organization Name</th><td><input type="text" name="cert_dn[organizationName]" value=<?PHP if (array_key_exists('O',$my_x509_parse['subject'])) print $my_x509_parse['subject']['O']; else print '""';?> size="25"></td></tr>
@@ -24,7 +25,7 @@ $my_x509_parse = openssl_x509_parse(file_get_contents($config['cacert']));
 <tr><th>Certificate Passphrase</th><td><input type="password" name="passphrase"/></td></tr>
 <tr><td><td><input type="submit" value="Create CSR"/>
 </table>
-</form> 
+</form>
 </p>
 <?PHP
 }
@@ -58,13 +59,13 @@ $filename=base64_encode($my_csrfile);
 print "CSR Filename : " . $my_csrfile."<BR>";
 if ($my_device_type=='ca_cert') {
   $client_keyFile = $config['cakey'];
-  $client_reqFile = $config['req_path'].$filename.".pem";  
+  $client_reqFile = $config['req_path'].$filename.".pem";
 }
 else {
   $client_keyFile = $config['key_path'].$filename.".pem";
   $client_reqFile = $config['req_path'].$filename.".pem";
 }
-	
+
 print "<h1>Creating Client CSR and Client Key</h1>";
 
 print "<b>Checking your DN (Distinguished Name)...</b><br/>";
@@ -100,6 +101,7 @@ $my_public_key_details=openssl_pkey_get_details(openssl_csr_get_public_key($my_c
 ?>
 <table  style="width: 90%;">
 <tr><th width=100>Common Name (eg www.golf.local)</th><td><?PHP print $my_details['CN'];?></td></tr>
+<tr><th width=100>SAN</th><td><?PHP print $my_details['subjectAltName'];?></td></tr>
 <tr><th>Contact Email Address</th><td><?PHP print $my_details['emailAddress'];?></td></tr>
 <tr><th>Organizational Unit Name</th><td><?PHP print $my_details['OU'];?></td></tr>
 <tr><th>Organization Name</th><td><?PHP print $my_details['O'];?></td></tr>
@@ -155,7 +157,7 @@ while (($file = readdir($dh)) !== false) {
 
 function download_csr($this_cert,$cer_ext) {
 $config=$_SESSION['config'];
-if (!isset($cer_ext)) 
+if (!isset($cer_ext))
   $cer_ext='FALSE';
 
 if ($this_cert == "zzTHISzzCAzz" )
@@ -175,7 +177,7 @@ else
   $download_certfile = $config['req_path']. $download_certfile.$ext;
   $application_type='application/octet-stream';
   }
-if ($cer_ext != 'FALSE') 
+if ($cer_ext != 'FALSE')
   $ext='.'.$cer_ext;
 
 if (file_exists($download_certfile)) {
@@ -216,7 +218,7 @@ $config=$_SESSION['config'];
 function import_csr($my_csr) {
 $config=$_SESSION['config'];
 
-//CN:Email:OU:O:L:ST:GB 
+//CN:Email:OU:O:L:ST:GB
 $cert_dn=openssl_csr_get_subject($my_csr);
 $my_csrfile="";
 while (list($key, $val) = each($config['blank_dn'])) {
@@ -287,7 +289,7 @@ else
       $my_csr = fread($fp, filesize($my_uploaded_file)) or die('Fatal: Error reading CSR file');
       fclose($fp) or die('Fatal: Error closing CSR file ');
       print "Done<br/><br/>\n";
-      $cert_dn=openssl_csr_get_subject($my_csr) or die('Invalid CSR Format.');	  
+      $cert_dn=openssl_csr_get_subject($my_csr) or die('Invalid CSR Format.');
 	  print "<table  style=\"width: 90%;\">";
       print "<tr><th width=100>Certificate Details</th><td></td></tr>";
 	  $my_index_name='';
@@ -316,7 +318,7 @@ else
         print "<b>Done";
 		}
     }
-	
+
 }
 
 
@@ -370,7 +372,7 @@ closedir($dh);
 </form>
 <?php
 }
-else 
+else
   print "<b> No Valid CSRs are available to view.</b>\n";
 ?>
 </p>
@@ -429,7 +431,7 @@ $dh = opendir($config['req_path']) or die('Unable to open  requests path');
 while (($file = readdir($dh)) !== false) {
 	if ( ($file !== ".htaccess") && is_file($config['req_path'].$file) )  {
 	  $name = base64_decode(substr($file, 0,strrpos($file,'.')));
-	  $ext = substr($file, strrpos($file,'.'));	
+	  $ext = substr($file, strrpos($file,'.'));
 	  if (!is_file($config['cert_path'].$file) or ($my_values['csr_name'] == "$name$ext") ) {
 	    $valid_files++;
 	  }
@@ -453,7 +455,7 @@ $dh = opendir($config['req_path']) or die('Unable to open  requests path');
 while (($file = readdir($dh)) !== false) {
 	if ( ($file !== ".htaccess") && is_file($config['req_path'].$file) )  {
 	  $name = base64_decode(substr($file, 0,strrpos($file,'.')));
-	  $ext = substr($file, strrpos($file,'.'));	
+	  $ext = substr($file, strrpos($file,'.'));
 	  if (!is_file($config['cert_path'].$file) or ($my_values['csr_name'] == "$name$ext") ) {
         if ( $my_values['csr_name'] == "$name$ext") $this_selected=" selected=\"selected\""; else $this_selected="";
 		print "<option value=\"$name$ext\"".$this_selected.">$name$ext</option>\n";
@@ -468,7 +470,7 @@ closedir($dh);
 </form>
 <?php
 }
-else 
+else
   print "<b> No Valid CSRs are available to sign.</b>\n";
 ?>
 </p>
@@ -509,9 +511,9 @@ if (!($my_device_type=='ca_cert')) {
   fclose($fp) or die('Fatal: Error closing CA Certificate'.$config['cacert']);
   print "Done<br/><br/>\n";
 }
-else 
+else
   $my_ca_cert = NULL;
-  
+
 print "<b>Loading CSR from file...</b><br/>";
 $fp = fopen($config['req_path'].$my_base64_csrfile, "r") or die('Fatal: Error opening CSR file'.$my_base64_csrfile);
 $my_csr = fread($fp, filesize($config['req_path'].$my_base64_csrfile)) or die('Fatal: Error reading CSR file'.$my_base64_csrfile);
@@ -542,14 +544,14 @@ $my_index_name="/C=".$my_x509_parse['subject']['C']."/ST=".$my_x509_parse['subje
 $index_line="V\t".$my_x509_parse['validTo']."\t\t".$my_hex_serial."\tunknown\t".$my_index_name;
 
 //Patern to match the index lines
-$pattern = '/(\D)\t(\d+[Z])\t(\d+[Z])?\t(\d+)\t(\D+)\t(.+)/'; 
+$pattern = '/(\D)\t(\d+[Z])\t(\d+[Z])?\t(\d+)\t(\D+)\t(.+)/';
 
 //Check to see if the certificate already exists in the Index file (ie. If someone clicks refresh on the webpage after creating a cert)
 $my_valid_cert=does_cert_exist($my_index_name);
 
 if ($my_valid_cert==0) {
   print "<b>Saving X509 Certificate...</b><br/>";
-  if ($my_device_type=='ca_cert') 
+  if ($my_device_type=='ca_cert')
     $my_scertfile = $config['cacert'];
   else
     $my_scertfile = $config['cert_path'].$my_base64_csrfile;
@@ -605,7 +607,7 @@ if ($my_device_type=='subca_cert') {
 }
 
   }
-else 
+else
   print "<h1>".$my_x509_parse['name']." already exists in the Index file and is Valid.</h1>";
 
 } //end of function sign_cert()
