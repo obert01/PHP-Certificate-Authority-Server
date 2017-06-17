@@ -121,7 +121,6 @@ if (0 === strpos($config['config'], sys_get_temp_dir())) {
     unlink($config['config']);
 }
 
-str_replace(search, replace, subject)
 print "<b>Exporting CSR to file...</b><br/>";
 openssl_csr_export_to_file($my_csr, $client_reqFile) or die ('Fatal: Error exporting CSR to file');
 print "Done<br/><br/>\n";
