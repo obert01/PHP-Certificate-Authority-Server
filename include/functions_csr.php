@@ -66,6 +66,23 @@ else {
   $client_reqFile = $config['req_path'].$filename.".pem";
 }
 
+// Write SAN to file if SAN are requested
+if (isset($_POST['subjectAltName']) { // check if SAN is not empty
+    $t_config = file_get_contents($config['config']);
+    //write the entire string
+    $temp_path = tempnam(sys_get_temp_dir(), "phpca-${cert_dn}");
+    copy($config['config'], $temp_path);
+    $t_config = str_replace('keyUsage = nonRepudiation, digitalSignature, keyEncipherment',
+                            'keyUsage = nonRepudiation, digitalSignature, keyEncipherment\nsubjectAltName = @alt_names', $t_config);
+    $t_config .= "[alt_names]\n";
+    $sa_names = $_POST['subjectAltName'].split(',');
+    foreach ($sa_na as $idx => $value) {
+        $t_config .= "DNS.${idx} = ${value}";
+    }
+    file_put_contents($temp_path, $t_config);
+    $config['config'] = $temp_path;
+}
+
 print "<h1>Creating Client CSR and Client Key</h1>";
 
 print "<b>Checking your DN (Distinguished Name)...</b><br/>";
@@ -91,6 +108,11 @@ print "Done<br/><br/>\n";
 print "<b>Creating CSR...</b><br/>";
 $my_csr = openssl_csr_new($cert_dn, $privkey,$config) or die('Fatal: Error creating CSR');
 print "Done<br/><br/>\n";
+
+if (0 === strpos($config['config'], sys_get_temp_dir())) {
+    // if config path starts with temp directory, delete it
+    unlink($config['config']);
+}
 
 print "<b>Exporting CSR to file...</b><br/>";
 openssl_csr_export_to_file($my_csr, $client_reqFile) or die ('Fatal: Error exporting CSR to file');
@@ -396,10 +418,10 @@ fclose($fp) or die('Fatal: Error closing CSR file '.$my_base64_csrfile);
 print "Done<br/><br/>\n";
 print $my_csr;
 print "<BR><BR><BR>\n\n\n";
-$my_details=openssl_csr_get_subject($my_csr);
-$my_public_key_details=openssl_pkey_get_details(openssl_csr_get_public_key($my_csr));
+$openssl_x509_parse = openssl_csr_get_subject($my_csr);
+$my_public_key_details = openssl_pkey_get_details(openssl_csr_get_public_key($my_csr));
 ?>
-<table  style="width: 90%;">
+<table style="width: 90%;">
 <tr><th width=100>Common Name (eg www.golf.local)</th><td><?PHP print $my_details['CN'];?></td></tr>
 <tr><th>Contact Email Address</th><td><?PHP print $my_details['emailAddress'];?></td></tr>
 <tr><th>Organizational Unit Name</th><td><?PHP print $my_details['OU'];?></td></tr>
