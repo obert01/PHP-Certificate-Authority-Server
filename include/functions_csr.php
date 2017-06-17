@@ -68,14 +68,13 @@ else {
 
 // Write SAN to file if SAN are requested
 if (isset($cert_dn['subjectAltName'])) {
-    $sa_names = array_merge($cert_dn['subjectAltName'], [$cert_dn['commonName'], ]);
+    $sa_names = $cert_dn['subjectAltName'].','.$cert_dn['commonName'];
 } else {
     $sa_names = $cert_dn['commonName'];
 }
 $t_config = file_get_contents($config['config']);
 //write the entire string
 $temp_path = tempnam(sys_get_temp_dir(), "phpca-${cert_dn}");
-copy($config['config'], $temp_path);
 $t_config .= <<<EOS
 
 [ v3_req ]
@@ -86,7 +85,7 @@ subjectAltName = @alt_names
 [alt_names]
 
 EOS;
-$sa_names = explode(',', $_POST['cert_dn']['subjectAltName']);
+$sa_names = explode(',', $sa_names);
 foreach ($sa_names as $idx => $value) {
     $my_idx = $idx + 1;
     $t_config .= "DNS.${my_idx} = ${value}".PHP_EOL;
