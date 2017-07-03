@@ -350,6 +350,7 @@ $this_html .= "<tr><td colspan=2 align=center><b>Name</TD></tr>";
 $this_html .= "<tr><td colspan=2 align=center>".$my_cert['name']."</tr>";
 $this_html .= "<tr><td colspan=2 align=center><b>Subject Details</TD></tr>";
 $this_html .= "<tr><th width=200>Common Name</th><td>".$my_cert['subject']['CN']."</td></tr>";
+$this_html .= "<tr><th width=200>Subject Alt Name</th><td>".$my_cert['extensions']['subjectAltName']."</td></tr>";
 $this_html .= "<tr><th>Contact Email Address</th><td>".$my_cert['subject']['emailAddress']."</td></tr>";
 $this_html .= "<tr><th>Organizational Unit Name</th><td>".$my_cert['subject']['OU']."</td></tr>";
 $this_html .= "<tr><th>Organization Name</th><td>".$my_cert['subject']['O']."</td></tr>";
