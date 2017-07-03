@@ -263,7 +263,7 @@ if ($retval) {
  die('Fatal: Error processing GENCRL command');
  }
 else
-  print "CRL published to ".$config[cacrl]."\n<br>";
+  print "CRL published to ".$config['cacrl']."\n<br>";
 }
 
 
