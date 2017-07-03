@@ -20,7 +20,7 @@ $my_x509_parse = openssl_x509_parse(file_get_contents($config['cacert']));
 <tr><th>City</th><td><input type="text" name="cert_dn[localityName]" value=<?PHP if (array_key_exists('L',$my_x509_parse['subject'])) print $my_x509_parse['subject']['L']; else print '""';?> size="25"></td></tr>
 <tr><th>State</th><td><input type="text" name="cert_dn[stateOrProvinceName]" value=<?PHP if (array_key_exists('ST',$my_x509_parse['subject'])) print $my_x509_parse['subject']['ST']; else print '""';?>  size="25"></td></tr>
 <tr><th>Country</th><td><input type="text" name="cert_dn[countryName]" value=<?PHP if (array_key_exists('C',$my_x509_parse['subject'])) print $my_x509_parse['subject']['C']; else print '""';?>  size="2"></td></tr>
-<tr><th>Key Size</th><td><input type="radio" name="cert_dn[keySize]" value="1024" /> 1024bits <input type="radio" name="cert_dn[keySize]" value="2048bits" /> 2048bits<input type="radio" name="cert_dn[keySize]" value="4096bits" checked /> 4096bits</td></tr>
+<tr><th>Key Size</th><td><input type="radio" name="cert_dn[keySize]" value="1024" /> 1024bits <input type="radio" name="cert_dn[keySize]" value="2048" /> 2048bits<input type="radio" name="cert_dn[keySize]" value="4096" checked /> 4096bits</td></tr>
 <tr><th>Device Type</th><td><input type="radio" name="device_type" value="client_cert" /> Client <input type="radio" name="device_type" value="server_cert" checked /> Server<input type="radio" name="device_type" value="msdc_cert"/> Microsoft Domain Controller<input type="radio" name="device_type" value="subca_cert" /> Sub_CA <input type="radio" name="device_type" value="8021x_client_cert" /> 802.1x Client<input type="radio" name="device_type" value="8021x_server_cert" /> 802.1x Server</td></tr>
 <tr><th>Certificate Passphrase</th><td><input type="password" name="passphrase"/></td></tr>
 <tr><td><td><input type="submit" value="Create CSR"/>
@@ -98,7 +98,7 @@ print "<h1>Creating Client CSR and Client Key</h1>";
 print "<b>Checking your DN (Distinguished Name)...</b><br/>";
 print "<pre>DN = ".var_export($cert_dn,1)."</pre>";
 print "<b>Generating new key...</b><br/>";
-print $my_keysize;
+print $my_keysize."<br/>";
 //$my_new_config=array('config'=>$config['config'],'private_key_bits'=>$config['private_key_bits'],'x509_extensions'=>$config['x509_extensions']);
 $my_new_config=array('config'=>$config['config'],'private_key_bits'=>(int)$my_keysize);
 //print_r($my_new_config);
@@ -116,7 +116,7 @@ openssl_pkey_export_to_file($privkey, $client_keyFile, $my_passphrase) or die ('
 print "Done<br/><br/>\n";
 
 print "<b>Creating CSR...</b><br/>";
-$my_csr = openssl_csr_new($cert_dn, $privkey,$config) or die('Fatal: Error creating CSR');
+$my_csr = openssl_csr_new($cert_dn,$privkey,$config) or die('Fatal: Error creating CSR');
 print "Done<br/><br/>\n";
 
 if (0 === strpos($config['config'], sys_get_temp_dir())) {
@@ -427,12 +427,14 @@ $my_csr = fread($fp, filesize($config['req_path'].$my_base64_csrfile)) or die('F
 fclose($fp) or die('Fatal: Error closing CSR file '.$my_base64_csrfile);
 print "Done<br/><br/>\n";
 print $my_csr;
+$my_details=openssl_csr_get_subject($my_csr);
 print "<BR><BR><BR>\n\n\n";
 $openssl_x509_parse = openssl_csr_get_subject($my_csr);
 $my_public_key_details = openssl_pkey_get_details(openssl_csr_get_public_key($my_csr));
 ?>
 <table style="width: 90%;">
-<tr><th width=100>Common Name (eg www.golf.local)</th><td><?PHP print $my_details['CN'];?></td></tr>
+<tr><th width=100>Common Name</th><td><?PHP print $my_details['CN'];?></td></tr>
+<tr><th width=100>Subject Alt Name</th><td><?PHP print $my_details['subjectAltName'];?></td></tr>
 <tr><th>Contact Email Address</th><td><?PHP print $my_details['emailAddress'];?></td></tr>
 <tr><th>Organizational Unit Name</th><td><?PHP print $my_details['OU'];?></td></tr>
 <tr><th>Organization Name</th><td><?PHP print $my_details['O'];?></td></tr>
@@ -552,6 +554,9 @@ $my_csr = fread($fp, filesize($config['req_path'].$my_base64_csrfile)) or die('F
 fclose($fp) or die('Fatal: Error closing CSR file '.$my_base64_csrfile);
 print "Done<br/><br/>\n";
 
+$csrDetails = openssl_csr_get_subject($my_csr);
+$csrCN = $csrDetails['CN'];
+
 if ($my_device_type=='ca_cert') {
   print "<b>Deleting CSR file from Cert Store...</b><br/>";
   unlink($config['req_path'].$my_base64_csrfile) or die('Fatal: Error deleting CSR file'.$my_base64_csrfile);
@@ -560,6 +565,40 @@ if ($my_device_type=='ca_cert') {
 
 print "<b>Signing CSR...</b><br/>";
 $my_serial=sprintf("%04d",get_serial());
+ 
+	if (isset($csrDetails['subjectAltName'])) {
+		$sanValues = explode(',', $csrDetails['subjectAltName']);
+		$sanValues[] = $csrDetails['CN'];
+		print "CSR contains Subject Alternative Names - ". $csrDetails['subjectAltName']."</br>\n";
+	} else {
+		$sanValues[] = $csrDetails['CN'];
+	}
+	
+$temp_config = file_get_contents($config['config']);
+//write the entire string to new temp config
+$temp_path = tempnam(sys_get_temp_dir(), "phpca-${csrCN}");
+$temp_config .= <<<EOS
+
+[ server_cert ]
+basicConstraints = CA:FALSE
+nsCertType = server
+nsComment = "PHP Certificate Authority Server Generated Certificate"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+issuerAltName = issuer:copy
+subjectAltName = @alt_names
+extendedKeyUsage = serverAuth
+
+[alt_names]
+EOS;
+foreach ($sanValues as $idx => $value) {
+	$my_idx = $idx + 1;
+	$temp_config .= "DNS.${my_idx} = ${value}".PHP_EOL;
+}
+file_put_contents($temp_path, $temp_config);
+//replace config path with temp
+$config['config'] = $temp_path;
+	
 $my_scert = openssl_csr_sign($my_csr, $my_ca_cert, $my_ca_privkey, $my_days, $config, $my_serial) or die('Fatal: Error signing CSR.');
 print "Done<br/><br/>\n";
 
@@ -597,7 +636,7 @@ if ($my_valid_cert==0) {
 	  fputs($fp, $my_x509_scert)  or die('Fatal: Error writing Signed Cert X509 file $my_scertfile') ;
 	  fclose($fp)  or die('Fatal: Error closing Signed Cert X509 file $my_scertfile') ;
     }
-    print "Done\n<br>\n";
+    print "Done<br/><br/>\n";
     print "<b>Updating Index File...</b><br>";
     $my_index_handle = fopen($config['index'], "a") or die('Fatal: Unable to open Index file for appending');
     fwrite($my_index_handle,$index_line."\n") or die('Fatal: Unable to append data to end of Index file');
