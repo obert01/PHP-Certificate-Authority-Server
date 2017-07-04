@@ -106,7 +106,7 @@ closedir($dh);
 
 if ($valid_files) {
 ?>
-<form action="index.php?menuoption=download_cert" method="post">
+<form action="index.php?menuoption=convert_cert_pkcs12" method="post">
 <input type="hidden" name="menuoption" value="convert_cert_pkcs12">
 <table  style="width: 400px;">
 <tr><td width=100>Private Key Passphrase:<td><input type="password" name="pkey_pass"/>
