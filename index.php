@@ -2,15 +2,15 @@
 if (session_id() === '') {
     session_start();
 }
-include("./include/settings.php");
-include("./include/functions_setup.php");
-include("./include/functions_layout.php");
-include("./include/functions_csr.php");
-include("./include/functions_cert.php");
-include("./include/functions_key.php");
-include("./include/functions_ca.php");
-include("./include/functions_show_summary.php");
-include("./include/functions_misc.php");
+include_once("./include/settings.php");
+include_once("./include/functions_setup.php");
+include_once("./include/functions_layout.php");
+include_once("./include/functions_csr.php");
+include_once("./include/functions_cert.php");
+include_once("./include/functions_key.php");
+include_once("./include/functions_ca.php");
+include_once("./include/functions_show_summary.php");
+include_once("./include/functions_misc.php");
 $config=update_config();
 $_SESSION['cwd'] = dirname(__FILE__);
 $page_variables=array();
@@ -197,7 +197,7 @@ switch ($menuoption) {
 
     case "revoke_cert":
         printHeader('Revoke a Certificate');
-        revoke_cert($page_variables['cert_serial'],$page_variables['pass']);
+        revoke_cert($page_variables['cert_serial'],$config['capassword']);
         printFooter();
     break;
 
@@ -214,7 +214,7 @@ switch ($menuoption) {
 
     case "convert_cert_pkcs12":
         printHeader('Convert Certificate to PKCS#12');
-        convert_cert_pkcs12($page_variables['cert_name'],$page_variables['pkey_pass'],$page_variables['pkcs12_pass']);
+        convert_cert_pkcs12($page_variables['cert_name'],$page_variables['pkey_pass'],$page_variables['pkey_pass']);
         printFooter();
     break;
 
@@ -265,7 +265,7 @@ switch ($menuoption) {
 
     case "sign_csr":
         printHeader('Signing CSR');
-        sign_csr($page_variables['pass'],$page_variables['csr_name'],$page_variables['days'],$page_variables['device_type']);
+        sign_csr($config['capassword'],$page_variables['csr_name'],$page_variables['days'],$page_variables['device_type']);
         printFooter();
     break;
 
