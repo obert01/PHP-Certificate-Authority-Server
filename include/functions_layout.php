@@ -69,11 +69,15 @@ $('tr.all_menu_class').contextMenu('all_menu', {
             $.post( 'index.php',{menuoption:'sign_csr_form',csr_name:t.id+'.pem',print_content_only:'TRUE'},function(data){var win = window.open('','Sign CSR','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,top=50,left=50,width=800,height=600');win.document.write(data);});
           },
           'download_csr': function(t) {
-            var url = '/phpca/index.php?menuoption=download_csr&csr_name=' + t.id + '.pem&rename_ext=csr';
+            var url = 'index.php?menuoption=download_csr&csr_name=' + t.id + '.pem&rename_ext=csr';
+            window.location = url;
+          },
+          'download_cert': function(t) {
+            var url = 'index.php?menuoption=download_cert&cert_name=' + t.id + '.pem';
             window.location = url;
           },
           'download_pkcs12': function(t) {
-            var url = '/phpca/index.php?menuoption=download_cert&cert_name=' + t.id + '.p12&rename_ext=pfx';
+            var url = 'index.php?menuoption=download_cert&cert_name=' + t.id + '.p12&rename_ext=pfx';
             window.location = url;
           },
           'view_cert': function(t) {
