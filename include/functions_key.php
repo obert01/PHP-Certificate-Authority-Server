@@ -166,13 +166,18 @@ if ($valid_files) {
 <option value="">--- Select a private key
 <?php
 $dh = opendir($config['key_path']) or die('Unable to open ' . $config['key_path']);
+$keys = array();
 while (($file = readdir($dh)) !== false) {
 	if ( ($file !== ".htaccess") && is_file($config['key_path'].$file) )  {
-		$name = base64_decode(substr($file, 0,strrpos($file,'.')));
+		$name = substr($file, 0,strrpos($file,'.'));
 		$ext = substr($file, strrpos($file,'.'));
-		if ( $my_values['key_name'] == "$name$ext") $this_selected=" selected=\"selected\""; else $this_selected="";
-		print "<option value=\"$name$ext\"$this_selected>$name$ext</option>\n";
+        $keys[$name.$ext] = $name.$ext;
 	}
+}
+asort($keys);
+while (list($key,$val) = each($keys)) {
+    if ( $my_values['key_name'] == "$key") $this_selected=" selected=\"selected\""; else $this_selected="";
+    print "<option value=\"$key\"$this_selected>$val</option>\n";
 }
 ?>
 </select></td></tr>
@@ -195,13 +200,12 @@ if (!isset($cer_ext))
 $this_name=substr($this_key_name, 0,strrpos($this_key_name,'.'));
 $this_ext=substr($this_key_name, strrpos($this_key_name,'.'));
 $down_ext=$this_ext;
-$base64_name = base64_encode($this_name);
-$my_base64_keyfile=$base64_name.$this_ext;
-$my_key_filename=$config['key_path'].$my_base64_keyfile;
+$my_key_filename=$config['key_path'].$this_key_name;
 $fp = fopen($my_key_filename, "r") or die('Fatal: Error opening Private Key');
 $my_privkey_x509 = fread($fp, filesize($my_key_filename)) or die('Fatal: Error reading Private Key');
 fclose($fp) or die('Fatal: Error closing Private Key');
-if ($my_privkey=openssl_pkey_get_private($my_privkey_x509, $my_passPhrase) or die('Fatal: Error decoding Private Key. Passphrase Incorrect') ) {
+$my_privkey=openssl_pkey_get_private($my_privkey_x509, $my_passPhrase);
+if ($my_privkey or die('Fatal: Error decoding Private Key. Passphrase Incorrect') ) {
   $application_type='application/octet-stream';
   if ($my_strip_passphrase=='TRUE') 
     openssl_pkey_export($my_privkey,$my_privkey_x509);
@@ -211,7 +215,7 @@ if ($my_privkey=openssl_pkey_get_private($my_privkey_x509, $my_passPhrase) or di
     $down_ext='.'.$cer_ext;
   if ($my_puttygen=='TRUE') {
 	$this_session=session_id();
-	file_put_contents('/tmp/'.$this_session.'.pem',$my_privkey_x509);
+	file_put_contents('./tmp/'.$this_session.'.pem',$my_privkey_x509);
 	$cmd='puttygen /tmp/'.$this_session.'.pem -O private -o /tmp/'.$this_session.'.ppk';
 	exec($cmd,$retval);
 	$my_privkey_x509=file_get_contents('/tmp/'.$this_session.'.ppk');
