@@ -342,7 +342,8 @@ switch ($menuoption) {
   case "show_summary":
     printHeader('Show Certificate Authority Summary');
     show_summary(!isset($page_variables['query']) ? NULL : $page_variables['query'],
-		 !isset($page_variables['show_revoked']) ? NULL : $page_variables['show_revoked']);
+		 !isset($page_variables['show_revoked']) ? NULL : $page_variables['show_revoked'],
+    		 !isset($page_variables['show_expired']) ? NULL : $page_variables['show_expired']);
     printFooter();
     break;
 

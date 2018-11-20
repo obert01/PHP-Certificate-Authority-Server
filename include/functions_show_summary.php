@@ -1,6 +1,6 @@
 <?PHP
 
-function show_summary($query = NULL, $show_revoked = FALSE) {
+function show_summary($query = NULL, $show_revoked = FALSE, $show_expired = FALSE) {
   $config=$_SESSION['config'];
   flush();
 ?>
@@ -8,7 +8,8 @@ function show_summary($query = NULL, $show_revoked = FALSE) {
     <input type="hidden" name="menuoption" value="show_summary"/>
     <table  style="width: 90%;">
       <tr><th width=100>Search certificate)</th><td><input type="text" name="query" value="" size="40"></td></tr>
-      <tr><th width=100>Show revoked certificates)</th><td><input type="checkbox" name="show_revoked" value=0""></td></tr>
+      <tr><th width=100>Show revoked certificates)</th><td><input type="checkbox" name="show_revoked" value="0"></td></tr>
+      <tr><th width=100>Show expired certificates)</th><td><input type="checkbox" name="show_expired" value="0"></td></tr>
       <tr><td><td><input type="submit" value="Search"/>
     </table>
   </form>
@@ -148,6 +149,8 @@ function show_summary($query = NULL, $show_revoked = FALSE) {
      $table_array['status']['font_weight']="bold";
    }
    elseif ($this_array['status']=="E") {
+     if (!$show_expired)
+       continue;
      $table_array['status']['background']=$my_grey_body;
      $table_array['status']['font_colour']="orange";
      $table_array['status']['text']="Expired";
