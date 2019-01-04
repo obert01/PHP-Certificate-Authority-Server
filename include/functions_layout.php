@@ -57,7 +57,6 @@ $('tr.all_menu_class').contextMenu('all_menu', {
             if (this_target.data('has_csr') == 'FALSE') $('#view_csr, #download_csr, #sign_csr', menu).remove();
             if (this_target.data('has_cert') == 'FALSE') $('#view_cert, #download_cert, #revoke_cert', menu).remove();
             if (this_target.data('has_pkcs12') == 'FALSE') $('#download_pkcs12', menu).remove();
-            if ( (this_target.data('has_pkcs12') == 'TRUE') || (this_target.data('has_cert') == 'FALSE') ) $('#convert_pkcs12', menu).remove();
             if (this_target.data('has_pkey') == 'FALSE') $('#check_pkey_passphrase, #download_pkey', menu).remove();
             return menu;
         },

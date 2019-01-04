@@ -93,15 +93,12 @@ function convert_cert_pkcs12_form($my_values=array('cert_name'=>'::zz::')){
     $dh = opendir($config['cert_path']) or die('Unable to open cert path');
     while (($file = readdir($dh)) !== false) {
       if ( ($file !== ".htaccess") && is_file($config['cert_path'].$file)
-	&& (substr($file, strrpos($file,'.')) == '.pem')
-	&& !file_exists($config['cert_path'].substr($file, 0, strrpos($file,'.')).".p12")) {
-	if (is_file($config['key_path'].$file) ) {
+	&& (substr($file, strrpos($file,'.')) == '.pem')) {
+	if (is_file($config['key_path'].$file) )
 	  $valid_files++;
-	}
       }
     }
     closedir($dh);
-
     if ($valid_files) {
     ?>
       <form action="index.php?menuoption=convert_cert_pkcs12" method="post">
@@ -115,8 +112,7 @@ function convert_cert_pkcs12_form($my_values=array('cert_name'=>'::zz::')){
 		$certs = array();
 		while (($file = readdir($dh)) !== false) {
 		  if ( ($file !== ".htaccess") && is_file($config['cert_path'].$file)
-		    && (substr($file, strrpos($file,'.')) == '.pem')
-		    && !file_exists($config['cert_path'].substr($file, 0, strrpos($file,'.')).".p12")) {
+		    && (substr($file, strrpos($file,'.')) == '.pem')) {
 		    if (is_file($config['key_path'].$file)  ) {
 		      $certs[$file] = $file;
 		    }
@@ -126,7 +122,8 @@ function convert_cert_pkcs12_form($my_values=array('cert_name'=>'::zz::')){
 		asort($certs);
 		while (list($key,$val) = each($certs)) {
 		  if ( $my_values['cert_name'] == "$key") $this_selected=" selected=\"selected\""; else $this_selected="";
-		  print "<option value=\"$key\"$this_selected>$val</option>\n";
+		  if (!file_exists($config['cert_path'].substr($val, 0, strrpos($val,'.')).".p12") || !empty($this_selected))
+		    print "<option value=\"$key\"$this_selected>$val</option>\n";
 		}
 		?>
 	    </select></td></tr>
