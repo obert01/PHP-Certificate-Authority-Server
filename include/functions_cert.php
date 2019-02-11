@@ -169,7 +169,7 @@ function convert_cert_pkcs12($this_cert_name,$my_pkey_pass,$my_pkcs12_pass){
   # OB: integrate root CA public certificate
   $args['extracerts'] = array("file://" . $config['cacert']);
   $args['friendly_name'] = $my_cert_parse['subject']['CN'];
-  openssl_pkcs12_export_to_file($my_cert,$my_pkcs12_filename,$my_privkey,$my_pkcs12_pass, $args) or die('Fatal: Error converting Certificate to PKCS#12 '.$my_pkcs12_filename);
+  openssl_pkcs12_export_to_file($my_cert,$my_pkcs12_filename,$my_privkey,$my_pkcs12_pass, $args) or die('Fatal: Error converting Certificate to PKCS#12 '.$my_pkcs12_filename . " - " . openssl_error_string());
   print "Done\n<br>\n";
 
   print "<b>Download PKCS#12 Certificate:</b>\n<br>\n<br>\n";
@@ -365,7 +365,7 @@ function get_cert_html($my_cert) {
   $this_html = "";
   $this_html .= "<table  style='width:500px;' border=1>";
   $this_html .= "<tr><td colspan=2 align=center><b>Name</TD></tr>";
-  $this_html .= "<tr><td colspan=2 align=center>".$my_cert['name']."</tr>";
+  $this_html .= "<tr><td colspan=2 align=center style=\"white-space: nowrap\">".$my_cert['name']."</tr>";
   $this_html .= "<tr><td colspan=2 align=center><b>Subject Details</TD></tr>";
   $this_html .= "<tr><th width=200>Common Name</th><td>".$my_cert['subject']['CN']."</td></tr>";
   $this_html .= "<tr><th width=200>Subject Key Identifier</th><td>".$my_cert['extensions']['subjectKeyIdentifier']."</td></tr>";

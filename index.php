@@ -208,7 +208,7 @@ switch ($menuoption) {
 
   case "convert_cert_pkcs12":
     printHeader('Convert Certificate to PKCS#12');
-    convert_cert_pkcs12($page_variables['cert_name'], "", $page_variables['pkey_pass']);
+    convert_cert_pkcs12($page_variables['cert_name'], null, $page_variables['pkey_pass']);
     printFooter();
     break;
 

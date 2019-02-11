@@ -8,8 +8,8 @@ function show_summary($query = NULL, $show_revoked = FALSE, $show_expired = FALS
     <input type="hidden" name="menuoption" value="show_summary"/>
     <table  style="width: 90%;">
       <tr><th width=100>Search certificate)</th><td><input type="text" name="query" value="" size="40"></td></tr>
-      <tr><th width=100>Show revoked certificates)</th><td><input type="checkbox" name="show_revoked" value="0"></td></tr>
-      <tr><th width=100>Show expired certificates)</th><td><input type="checkbox" name="show_expired" value="0"></td></tr>
+      <tr><th width=100>Show revoked certificates</th><td><input type="checkbox" name="show_revoked"></td></tr>
+      <tr><th width=100>Show expired certificates</th><td><input type="checkbox" name="show_expired"></td></tr>
       <tr><td><td><input type="submit" value="Search"/>
     </table>
   </form>

@@ -114,7 +114,7 @@ function get_KeyValue($haystack = array(), $needle = '', $default_value = false)
 function generatePassword( $passwordChars = '', $passwordSize = 12)
 {
   if( $passwordChars == '')
-    $passwordChars = '$=@#!23456789bcdfghjkmnpqrstvwxyzADEFGHLMRT';
+    $passwordChars = '$=@#!23456789bcdfghjkmnpqrstvwxyz';
   if ($passwordSize <= 0 && $passwordSize >= 100)
     $passwordSize = 12;
   $password = '';

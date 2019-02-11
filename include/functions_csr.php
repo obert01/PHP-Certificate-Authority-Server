@@ -77,6 +77,7 @@ function create_csr($my_cert_dn,$my_keysize,$my_passphrase,$my_device_type) {
 [ v3_req ]
 basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = critical,clientAuth
 subjectAltName = @alt_names
 
 [alt_names]
