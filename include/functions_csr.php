@@ -116,7 +116,7 @@ EOS;
   $my_csr = openssl_csr_new($cert_dn,$privkey,$config) or die('Fatal: Error creating CSR');
   print "Done<br/><br/>\n";
 
-  if (0 === strpos($config['config'], "tmp/")) {
+  if (FALSE !== strpos($config['config'], "tmp/")) {
     // if config path starts with temp directory, delete it
     unlink($config['config']);
   }
