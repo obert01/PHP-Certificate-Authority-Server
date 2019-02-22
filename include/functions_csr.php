@@ -75,9 +75,7 @@ function create_csr($my_cert_dn,$my_keysize,$my_passphrase,$my_device_type) {
   $t_config .= <<<EOS
 
 [ v3_req ]
-basicConstraints = CA:FALSE
-keyUsage = nonRepudiation, digitalSignature, keyEncipherment
-extendedKeyUsage = critical,clientAuth
+{$config['v3_req_properties'][$my_device_type]}
 subjectAltName = @alt_names
 
 [alt_names]

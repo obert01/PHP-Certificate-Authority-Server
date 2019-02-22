@@ -50,6 +50,14 @@ function update_config() {
     'ST'=>"stateOrProvinceName",
     'C'=>"countryName"
   );
+  $config['v3_req_properties'] = array(
+      "client_cert" => "basicConstraints = critical,CA:FALSE\nkeyUsage = critical,nonRepudiation,digitalSignature,keyEncipherment\nextendedKeyUsage = critical,clientAuth,emailProtection",
+      "server_cert" => "basicConstraints = critical,CA:FALSE\nkeyUsage = critical,digitalSignature, keyEncipherment\nextendedKeyUsage = critical,serverAuth",
+      "msdc_cert" => "basicConstraints = critical,CA:FALSE\nkeyUsage = critical,nonRepudiation, digitalSignature, keyEncipherment\nextendedKeyUsage = critical,clientAuth,serverAuth",
+      "ca_cert" => "basicConstraints = critical,CA:TRUE\nkeyUsage = critical,keyCertSign, cRLSign",
+      "subca_cert" => "basicConstraints = critical,CA:TRUE\nkeyUsage = critical,keyCertSign, cRLSign",
+      "8021x_client_cert" => "basicConstraints = critical,CA:FALSE\nextendedKeyUsage = 1.3.6.1.5.5.7.3.2",
+      "8021x_server_cert" => "basicConstraints = critical,CA:FALSE\nextendedKeyUsage = 1.3.6.1.5.5.7.3.1");
   if (is_file($config['cacert']) ) {
     $data = openssl_x509_parse(file_get_contents($config['cacert']));
     if (isset($data['subject']['CN'])) {$config['common'] = $data['subject']['CN'];}
